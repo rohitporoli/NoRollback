@@ -92,6 +92,10 @@ body.b .pg{color:var(--bt)}
 .kn{transform-origin:95px 54px;animation:kn 6s ease-in-out infinite}
 @keyframes kn{0%,48%{transform:scale(0);opacity:0}50%{opacity:1}57%{transform:scale(1.6)}63%{transform:scale(.85)}70%,100%{transform:scale(1);opacity:1}}
 @media (prefers-reduced-motion:reduce){.sw{animation:none!important}}
+.mu{position:fixed;top:calc(.6rem + env(safe-area-inset-top,0px));right:.8rem;z-index:11;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:1.5px solid currentColor;border-radius:50%;color:var(--pt);cursor:pointer;transition:color .5s}
+body.b .mu{color:var(--bt)}
+.mu:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+.mu .off{display:none}.mu.m .on{display:none}.mu.m .off{display:inline}
 </style>
 </head>
 <body class="p">
@@ -152,6 +156,8 @@ body.b .pg{color:var(--bt)}
 </div></section>
 </main>
 
+<audio id="bgm" src="Everyday.mp3" loop preload="auto" autoplay playsinline></audio>
+<button type="button" class="mu" id="mu" aria-label="Mute music"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4z"/><path class="on" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="off" d="M16 9l5 6M21 9l-5 6"/></svg></button>
 <nav class="pg" aria-label="Invitation pages">
 <button type="button" id="nx" aria-label="Next page"></button>
 </nav>
@@ -206,6 +212,21 @@ document.getElementById('sh').addEventListener('click',function(){
   try{navigator.clipboard.writeText(u).then(function(){out.textContent='Link copied.'},function(){out.textContent='Copy the link from the address bar.'})}
   catch(e){out.textContent='Copy the link from the address bar.'}
 });
+var au=document.getElementById('bgm'),mu=document.getElementById('mu'),ev=['pointerdown','touchend','keydown','click'];
+function arm(){ev.forEach(function(e){addEventListener(e,kick,true)})}
+function disarm(){ev.forEach(function(e){removeEventListener(e,kick,true)})}
+function kick(e){if(e.target===mu||mu.contains(e.target))return;disarm();au.muted=false;au.play().catch(arm)}
+function sync(){var m=au.paused||au.muted;mu.classList.toggle('m',m);mu.setAttribute('aria-label',m?'Play music':'Mute music')}
+au.volume=.8;
+var pr=au.play();
+if(pr&&pr.then){pr.then(sync,function(){arm();sync()})}else{sync()}
+au.addEventListener('play',sync);au.addEventListener('pause',sync);
+mu.addEventListener('click',function(){
+  disarm();
+  if(au.paused){au.muted=false;au.play().catch(function(){})}else{au.pause()}
+  sync();
+});
+document.addEventListener('visibilitychange',function(){if(document.hidden&&!au.paused){au.pause();au.dataset.r=1}else if(!document.hidden&&au.dataset.r){delete au.dataset.r;au.play().catch(function(){})}});
 })();
 </script>
 </body>
